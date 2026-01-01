@@ -1,4 +1,4 @@
-# ⚡ Neon Cyberpunk Calculator
+# ⚡simple Calculator
 
 A futuristic, cyberpunk-themed calculator with stunning neon visual effects, smooth animations, and interactive features.
 
