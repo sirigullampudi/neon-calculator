@@ -1,760 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neon Calculator</title>
 
-    <title>Calculator | Professional Neon Design</title>
+<style>
+/* ===================== RESET ===================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-    <title>Simple Calculator</title>
+/* ===================== PAGE ===================== */
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0a0e27, #1a1f3a, #0f1829);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+/* ===================== CALCULATOR ===================== */
+.calculator-wrapper {
+    width: 100%;
+    max-width: 380px;
+    min-width: 320px;
 
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1829 100%);
+    background: rgba(10, 14, 39, 0.95);
+    padding: 30px;
+    border-radius: 22px;
 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: 2px solid rgba(0, 255, 255, 0.25);
+    box-shadow: 
+        0 0 30px rgba(0, 255, 255, 0.15),
+        inset 0 0 20px rgba(0, 255, 255, 0.05);
+}
 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-        }
+/* ===================== HEADER ===================== */
+.calculator-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
 
+.calculator-title {
+    color: #00ffc8;
+    font-size: 20px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 12px rgba(0,255,200,.6);
+}
 
-        /* Animated background grid */
-        body::before {
-            content: '';
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.03) 25%, rgba(0, 255, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.03) 75%, rgba(0, 255, 255, 0.03) 76%, transparent 77%, transparent),
-                linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.03) 25%, rgba(0, 255, 255, 0.03) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.03) 75%, rgba(0, 255, 255, 0.03) 76%, transparent 77%, transparent);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
+/* ===================== DISPLAY ===================== */
+.display-container {
+    background: rgba(0, 20, 40, 0.95);
+    border: 2px solid rgba(0, 255, 200, 0.35);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
+}
 
-        /* ======================== CONTAINER ======================== */
-        .calculator-wrapper {
-            position: relative;
-            z-index: 1;
-            backdrop-filter: blur(10px);
-            background: rgba(10, 14, 39, 0.95);
-            padding: 40px;
-            border-radius: 24px;
-            border: 2px solid rgba(0, 255, 255, 0.2);
-            box-shadow: 
-                0 0 30px rgba(0, 255, 255, 0.15),
-                0 0 60px rgba(0, 255, 255, 0.08),
-                inset 0 0 30px rgba(0, 255, 255, 0.03);
-            width: 100%;
-            max-width: 420px;
-        }
+.display {
+    font-size: 40px;
+    color: #00ffc8;
+    text-align: right;
+    font-family: "Courier New", monospace;
+    word-break: break-all;
+}
 
-        /* ======================== HEADER ======================== */
-        .calculator-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.15);
-        }
+/* ===================== BUTTON GRID ===================== */
+.button-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(60px, 1fr));
+    gap: 12px;
+}
 
-        .calculator-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #00ffc8;
-            letter-spacing: 1px;
-            text-shadow: 0 0 15px rgba(0, 255, 200, 0.3);
-        }
+/* ===================== BUTTON BASE ===================== */
+.btn {
+    min-width: 60px;
+    min-height: 52px;
 
-        .controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
+    padding: 16px;
+    font-size: 18px;
+    font-weight: 600;
 
-        /* Sound toggle */
-        .toggle-switch {
-            position: relative;
-            width: 48px;
-            height: 24px;
-            background: rgba(255, 0, 127, 0.25);
-            border: 1.5px solid #ff007f;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.2);
-        }
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
 
-        .toggle-switch.active {
-            background: rgba(255, 0, 127, 0.5);
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
-        }
+    transition: transform 0.15s ease, background 0.2s ease;
+}
 
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #ff007f;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 5px rgba(255, 0, 127, 0.6);
-        }
+/* ===================== BUTTON TYPES ===================== */
 
-        .toggle-switch.active::after {
-            left: 24px;
-        }
+/* Numbers */
+.btn.number {
+    background: rgba(0, 200, 255, 0.18);
+    color: #00d4ff;
+    border: 1px solid rgba(0, 200, 255, 0.5);
+}
+.btn.number:hover {
+    background: rgba(0, 200, 255, 0.3);
+}
 
-        .toggle-label {
-            font-size: 11px;
-            color: #ff007f;
-            text-shadow: 0 0 5px rgba(255, 0, 127, 0.4);
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
+/* Operators */
+.btn.operator {
+    background: rgba(255, 0, 127, 0.2);
+    color: #ff4d94;
+    border: 1px solid rgba(255, 0, 127, 0.5);
+}
+.btn.operator:hover {
+    background: rgba(255, 0, 127, 0.35);
+}
 
-        /* ======================== DISPLAY ======================== */
-        .display-container {
-            background: rgba(0, 20, 40, 0.95);
-            border: 2px solid rgba(0, 255, 200, 0.3);
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 30px;
-            box-shadow: 
-                inset 0 0 15px rgba(0, 255, 200, 0.1),
-                0 0 20px rgba(0, 255, 200, 0.1);
-            transition: all 0.3s ease;
-        }
+/* Clear */
+.btn.clear {
+    grid-column: span 2;
+    background: rgba(255, 60, 100, 0.25);
+    color: #ff6b7f;
+}
+.btn.clear:hover {
+    background: rgba(255, 60, 100, 0.4);
+}
 
-        .display-container.active {
-            border-color: rgba(0, 255, 200, 0.6);
-            box-shadow: 
-                inset 0 0 20px rgba(0, 255, 200, 0.15),
-                0 0 30px rgba(0, 255, 200, 0.2);
-        }
+/* Equals */
+.btn.equals {
+    grid-column: span 2;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 255, 127, 0.45),
+        rgba(0, 255, 127, 0.2)
+    );
+    color: #00ff80;
+    font-weight: 700;
+}
+.btn.equals:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(0, 255, 127, 0.6),
+        rgba(0, 255, 127, 0.3)
+    );
+}
 
-        .display {
-            font-size: 52px;
-            color: #00ffc8;
-            text-align: right;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-shadow: 0 0 15px rgba(0, 255, 200, 0.6),
-                         0 0 30px rgba(0, 255, 200, 0.2);
-            min-height: 70px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            word-wrap: break-word;
-            word-break: break-all;
-            font-family: 'Courier New', monospace;
-        }
+/* ===================== ACTIVE EFFECT ===================== */
+.btn:active {
+    transform: scale(0.96);
+}
 
-        .status-bar {
-            font-size: 12px;
-            color: rgba(0, 255, 200, 0.5);
-            text-align: right;
-            margin-top: 12px;
-            min-height: 18px;
-            text-shadow: 0 0 5px rgba(0, 255, 200, 0.3);
-            letter-spacing: 0.5px;
-        }
-
-        /* ======================== BUTTON GRID ======================== */
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        /* Button base styles */
-        .btn {
-            padding: 16px 12px;
-            font-size: 18px;
-
-        .calculator {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            width: 320px;
-        }
-        .title {
-            text-align: center;
-            color: #333;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .display {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 24px;
-            font-weight: 600;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: right;
-            margin-bottom: 20px;
-            min-height: 60px;
-            word-wrap: break-word;
-            word-break: break-all;
-            line-height: 1.5;
-            max-height: 100px;
-            overflow-y: auto;
-        }
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        button {
-            padding: 20px;
-            font-size: 20px;
-
-            font-weight: 600;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-family: 'Segoe UI', sans-serif;
-            position: relative;
-            overflow: hidden;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 50px;
-        }
-
-        /* Ripple effect */
-        .btn::before {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.5s, height 0.5s;
-        }
-
-        .btn:active::before {
-            width: 250px;
-            height: 250px;
-        }
-
-        .btn:active {
-            transform: scale(0.96);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Number buttons - Neon Blue */
-        .btn.number {
-            background: rgba(0, 200, 255, 0.15);
-            color: #00d4ff;
-            border: 1.5px solid rgba(0, 200, 255, 0.4);
-            box-shadow: 0 4px 12px rgba(0, 150, 255, 0.1);
-        }
-
-        .btn.number:hover {
-            background: rgba(0, 200, 255, 0.25);
-            border-color: rgba(0, 200, 255, 0.6);
-            box-shadow: 0 6px 20px rgba(0, 150, 255, 0.2);
-        }
-
-        /* Operator buttons - Neon Pink/Purple */
-        .btn.operator {
-            background: rgba(255, 0, 127, 0.15);
-            color: #ff4d94;
-            border: 1.5px solid rgba(255, 0, 127, 0.4);
-            box-shadow: 0 4px 12px rgba(255, 0, 127, 0.1);
-        }
-
-        .btn.operator:hover {
-            background: rgba(255, 0, 127, 0.25);
-            border-color: rgba(255, 0, 127, 0.6);
-            box-shadow: 0 6px 20px rgba(255, 0, 127, 0.2);
-        }
-
-        /* Equals button - Neon Green */
-        .btn.equals {
-            grid-column: span 2;
-            background: linear-gradient(135deg, rgba(0, 255, 127, 0.2), rgba(0, 255, 127, 0.1));
-            color: #00ff80;
-            border: 1.5px solid rgba(0, 255, 127, 0.5);
-            box-shadow: 0 4px 15px rgba(0, 255, 127, 0.15);
-            font-weight: 700;
-        }
-
-        .btn.equals:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 127, 0.3), rgba(0, 255, 127, 0.15));
-            border-color: rgba(0, 255, 127, 0.8);
-            box-shadow: 0 6px 25px rgba(0, 255, 127, 0.3);
-        }
-
-        /* Clear button - Neon Red */
-        .btn.clear {
-            grid-column: span 2;
-            background: rgba(255, 60, 100, 0.15);
-            color: #ff6b7f;
-            border: 1.5px solid rgba(255, 60, 100, 0.4);
-            box-shadow: 0 4px 12px rgba(255, 60, 100, 0.1);
-        }
-
-        .btn.clear:hover {
-            background: rgba(255, 60, 100, 0.25);
-            border-color: rgba(255, 60, 100, 0.6);
-            box-shadow: 0 6px 20px rgba(255, 60, 100, 0.2);
-        }
-
-        /* Special button for decimal - Cyan */
-        .btn.decimal {
-            background: rgba(0, 255, 255, 0.15);
-            color: #00ffff;
-            border: 1.5px solid rgba(0, 255, 255, 0.4);
-            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
-        }
-
-        .btn.decimal:hover {
-            background: rgba(0, 255, 255, 0.25);
-            border-color: rgba(0, 255, 255, 0.6);
-            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.2);
-        }
-
-        /* ======================== RESPONSIVE ======================== */
-        @media (max-width: 600px) {
-            .calculator-wrapper {
-                padding: 25px;
-                width: 92vw;
-                max-width: 380px;
-            }
-
-            .calculator-title {
-                font-size: 18px;
-            }
-
-            .display {
-                font-size: 40px;
-            }
-
-            .btn {
-                padding: 14px 10px;
-                font-size: 16px;
-                min-height: 45px;
-            }
-
-            .button-grid {
-                gap: 10px;
-            }
-        }
-    </style>
-    </style>
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 420px) {
+    .calculator-wrapper {
+        width: 92vw;
+    }
+    .display {
+        font-size: 34px;
+    }
+}
+</style>
 </head>
+
 <body>
-    <div class="calculator-wrapper">
-        <!-- Header with controls -->
-        <div class="calculator-header">
-            <div class="calculator-title">Calculator</div>
-            <div class="controls">
-                <div>
-                    <div class="toggle-label">🔊 SOUND</div>
-                    <div class="toggle-switch" id="soundToggle"></div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Display -->
-        <div class="display-container" id="displayContainer">
-            <div class="display" id="display">0</div>
-            <div class="status-bar" id="statusBar"></div>
-        </div>
-
-        <!-- Button Grid -->
-        <div class="button-grid">
-            <!-- First row -->
-            <button class="btn clear" data-action="clear">AC</button>
-            <button class="btn operator" data-operator="/">÷</button>
-            <button class="btn operator" data-operator="*">×</button>
-            <button class="btn operator" data-operator="-">−</button>
-
-            <!-- Number rows -->
-            <button class="btn number" data-number="7">7</button>
-            <button class="btn number" data-number="8">8</button>
-            <button class="btn number" data-number="9">9</button>
-            <button class="btn operator" data-operator="+">+</button>
-
-            <button class="btn number" data-number="4">4</button>
-            <button class="btn number" data-number="5">5</button>
-            <button class="btn number" data-number="6">6</button>
-            <button class="btn decimal" data-action="decimal">.</button>
-
-            <button class="btn number" data-number="1">1</button>
-            <button class="btn number" data-number="2">2</button>
-            <button class="btn number" data-number="3">3</button>
-            <button class="btn operator" data-operator="del">⌫</button>
-
-            <!-- Bottom row -->
-            <button class="btn number" data-number="0">0</button>
-            <button class="btn equals" data-action="equals">=</button>
-=======
-            transition: all 0.3s ease;
-            background: #f0f0f0;
-            color: #333;
-        }
-        button:hover {
-            background: #e0e0e0;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        button:active {
-            transform: translateY(0);
-        }
-        .operator {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .operator:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a3f95 100%);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .equals {
-            grid-column: span 2;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-        .equals:hover {
-            background: linear-gradient(135deg, #e88aea 0%, #f0475b 100%);
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
-        }
-        .clear {
-            grid-column: span 2;
-            background: #ff6b6b;
-            color: white;
-        }
-        .clear:hover {
-            background: #ee5a52;
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
-        }
-    </style>
-</head>
-<body>
-    <div class="calculator">
-        <div class="title">Simple Calculator</div>
-        <div class="display" id="display">0</div>
-        <div class="buttons">
-            <button class="clear" onclick="calculator.clear()">Clear</button>
-            <button class="operator" onclick="calculator.del()">DEL</button>
-            <button class="operator" onclick="calculator.appendOperator('/')">/</button>
-            <button onclick="calculator.appendNumber('7')">7</button>
-            <button onclick="calculator.appendNumber('8')">8</button>
-            <button onclick="calculator.appendNumber('9')">9</button>
-            <button class="operator" onclick="calculator.appendOperator('*')">×</button>
-            <button onclick="calculator.appendNumber('4')">4</button>
-            <button onclick="calculator.appendNumber('5')">5</button>
-            <button onclick="calculator.appendNumber('6')">6</button>
-            <button class="operator" onclick="calculator.appendOperator('-')">−</button>
-            <button onclick="calculator.appendNumber('1')">1</button>
-            <button onclick="calculator.appendNumber('2')">2</button>
-            <button onclick="calculator.appendNumber('3')">3</button>
-            <button class="operator" onclick="calculator.appendOperator('+')">+</button>
-            <button onclick="calculator.appendNumber('0')">0</button>
-            <button onclick="calculator.appendDecimal('.')">.</button>
-            <button class="equals" onclick="calculator.calculate()">=</button>
-        </div>
+<div class="calculator-wrapper">
+    <div class="calculator-header">
+        <div class="calculator-title">NEON CALCULATOR</div>
     </div>
-    <script>
 
-        // ======================== CALCULATOR LOGIC ========================
-        class NeonCalculator {
-            constructor() {
-                // State
-                this.display = document.getElementById('display');
-                this.statusBar = document.getElementById('statusBar');
-                this.displayContainer = document.getElementById('displayContainer');
-                this.currentValue = '0';
-                this.previousValue = null;
-                this.operator = null;
-                this.shouldResetDisplay = false;
-                this.soundEnabled = false;
-                this.lastActivityTime = Date.now();
-                this.idleThreshold = 3000; // ms
+    <div class="display-container">
+        <div class="display" id="display">0</div>
+    </div>
 
-                // Initialize
-                this.initEventListeners();
-                this.initSound();
-                this.updateDisplay();
-            }
+    <div class="button-grid">
+        <button class="btn clear" onclick="clearDisplay()">AC</button>
+        <button class="btn operator" onclick="appendOperator('/')">÷</button>
+        <button class="btn operator" onclick="appendOperator('*')">×</button>
 
-            // ======================== EVENT LISTENERS ========================
-            initEventListeners() {
-                // Number buttons
-                document.querySelectorAll('[data-number]').forEach(btn => {
-                    btn.addEventListener('click', (e) => this.handleNumber(e.target.dataset.number));
-                });
+        <button class="btn number" onclick="appendNumber('7')">7</button>
+        <button class="btn number" onclick="appendNumber('8')">8</button>
+        <button class="btn number" onclick="appendNumber('9')">9</button>
+        <button class="btn operator" onclick="appendOperator('-')">−</button>
 
-                // Operator buttons
-                document.querySelectorAll('[data-operator]').forEach(btn => {
-                    btn.addEventListener('click', (e) => this.handleOperator(e.target.dataset.operator));
-                });
+        <button class="btn number" onclick="appendNumber('4')">4</button>
+        <button class="btn number" onclick="appendNumber('5')">5</button>
+        <button class="btn number" onclick="appendNumber('6')">6</button>
+        <button class="btn operator" onclick="appendOperator('+')">+</button>
 
-                // Action buttons
-                document.querySelectorAll('[data-action]').forEach(btn => {
-                    btn.addEventListener('click', (e) => this.handleAction(e.target.dataset.action));
-                });
+        <button class="btn number" onclick="appendNumber('1')">1</button>
+        <button class="btn number" onclick="appendNumber('2')">2</button>
+        <button class="btn number" onclick="appendNumber('3')">3</button>
 
-                // Keyboard support
-                window.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        this.handleAction('equals');
-                    } else if (e.key === 'Backspace') {
-                        this.handleOperator('del');
-                    } else if (e.key === 'Escape') {
-                        this.handleAction('clear');
-                    } else if (/^[0-9+\-*/.=]$/.test(e.key)) {
-                        if (e.key === '=') {
-                            this.handleAction('equals');
-                        } else if (e.key === '.') {
-                            this.handleAction('decimal');
-                        } else if (/^[+\-*/]$/.test(e.key)) {
-                            this.handleOperator(e.key);
-                        } else {
-                            this.handleNumber(e.key);
-                        }
-                    }
-                });
-            }
+        <button class="btn number" onclick="appendNumber('0')">0</button>
+        <button class="btn number" onclick="appendDecimal()">.</button>
+        <button class="btn equals" onclick="calculate()">=</button>
+    </div>
+</div>
 
-            // ======================== SOUND SYSTEM ========================
-            initSound() {
-                const soundToggle = document.getElementById('soundToggle');
-                soundToggle.addEventListener('click', () => {
-                    this.soundEnabled = !this.soundEnabled;
-                    soundToggle.classList.toggle('active');
-                });
-            }
+<script>
+let expression = "";
 
-            playClickSound() {
-                if (!this.soundEnabled) return;
+function updateDisplay() {
+    document.getElementById("display").textContent = expression || "0";
+}
 
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gain = audioContext.createGain();
+function appendNumber(num) {
+    expression += num;
+    updateDisplay();
+}
 
-                oscillator.connect(gain);
-                gain.connect(audioContext.destination);
+function appendOperator(op) {
+    if (!expression) return;
+    const last = expression.slice(-1);
+    if ("+-*/".includes(last)) return;
+    expression += op;
+    updateDisplay();
+}
 
-                oscillator.frequency.value = 800;
-                oscillator.type = 'sine';
+function appendDecimal() {
+    const parts = expression.split(/[\+\-\*\/]/);
+    if (!parts[parts.length - 1].includes(".")) {
+        expression += ".";
+        updateDisplay();
+    }
+}
 
-                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+function clearDisplay() {
+    expression = "";
+    updateDisplay();
+}
 
-                oscillator.start(audioContext.currentTime);
-                oscillator.stop(audioContext.currentTime + 0.1);
-            }
+function calculate() {
+    try {
+        expression = eval(expression).toString();
+        updateDisplay();
+    } catch {
+        expression = "Error";
+        updateDisplay();
+        setTimeout(clearDisplay, 1000);
+    }
+}
+</script>
 
-
-
-            // ======================== IDLE STATUS ========================
-            initIdleStatus() {
-                setInterval(() => {
-                    const idleTime = Date.now() - this.lastActivityTime;
-                    if (idleTime > this.idleThreshold && this.operator === null && this.shouldResetDisplay === false) {
-                        this.statusBar.textContent = '⚡ Ready';
-                        this.statusBar.classList.remove('active');
-                    }
-                }, 500);
-            }
-
-            updateIdleStatus() {
-                this.lastActivityTime = Date.now();
-                this.statusBar.classList.add('active');
-                this.statusBar.textContent = '⚡ Processing...';
-            }
-
-            // ======================== NUMBER HANDLING ========================
-            handleNumber(num) {
-                this.playClickSound();
-
-                if (this.shouldResetDisplay) {
-                    this.currentValue = num;
-                    this.shouldResetDisplay = false;
-                } else {
-                    this.currentValue = this.currentValue === '0' ? num : this.currentValue + num;
-                }
-
-                // Limit display length
-                if (this.currentValue.length > 12) {
-                    this.currentValue = this.currentValue.slice(0, 12);
-                }
-
-                this.updateDisplay();
-            }
-
-            // ======================== OPERATOR HANDLING ========================
-            handleOperator(op) {
-                this.playClickSound();
-
-                if (op === 'del') {
-                    // Delete last character
-                    if (this.currentValue.length > 1) {
-                        this.currentValue = this.currentValue.slice(0, -1);
-                    } else {
-                        this.currentValue = '0';
-                    }
-                    this.shouldResetDisplay = false;
-                    this.updateDisplay();
-                    return;
-                }
-
-                // Handle pending operation
-                if (this.operator !== null && !this.shouldResetDisplay) {
-                    this.calculate();
-                }
-
-                this.previousValue = this.currentValue;
-                this.operator = op;
-                this.shouldResetDisplay = true;
-                this.updateDisplay();
-            }
-
-            // ======================== ACTION HANDLING ========================
-            handleAction(action) {
-                this.playClickSound();
-
-                if (action === 'clear') {
-                    this.reset();
-                } else if (action === 'decimal') {
-                    this.addDecimal();
-                } else if (action === 'equals') {
-                    this.calculate();
-        const calculator = {
-            expression: '',
-            display: document.getElementById('display'),
-            appendNumber(num) {
-                this.expression += num;
-                this.updateDisplay();
-            },
-            appendOperator(op) {
-                if (this.expression === '') return;
-                const lastChar = this.expression[this.expression.length - 1];
-                if (['+', '-', '×', '/', '*'].includes(lastChar)) return;
-                this.expression += op;
-                this.updateDisplay();
-            },
-            appendDecimal(dot) {
-                if (this.expression === '') {
-                    this.expression = '0.';
-                } else if (!this.expression.endsWith('.')) {
-                    this.expression += dot;
-                }
-                this.updateDisplay();
-            },
-            calculate() {
-                if (this.expression === '') return;
-                try {
-                    const result = eval(this.expression.replace(/×/g, '*').replace(/−/g, '-'));
-                    this.expression = result.toString();
-                    this.updateDisplay();
-                } catch (e) {
-                    this.display.textContent = 'Error';
-                    setTimeout(() => {
-                        this.clear();
-                    }, 1500);
-              
-
-                // Format result
-                this.currentValue = result.toString();
-                if (this.currentValue.includes('.')) {
-                    this.currentValue = parseFloat(this.currentValue).toFixed(8).replace(/\.?0+$/, '');
-                }
-
-                // Limit display length
-                if (this.currentValue.length > 12) {
-                    this.currentValue = parseFloat(this.currentValue).toExponential(5);
-                }
-
-                this.operator = null;
-                this.previousValue = null;
-                this.shouldResetDisplay = true;
-                this.statusBar.textContent = '✓ Calculated';
-                this.lastActivityTime = Date.now();
-            }
-
-            // ======================== RESET ========================
-            reset() {
-                this.currentValue = '0';
-                this.previousValue = null;
-                this.operator = null;
-                this.shouldResetDisplay = false;
-                this.statusBar.textContent = '⚡ Cleared';
-            }
-
-            // ======================== DISPLAY UPDATE ========================
-            updateDisplay() {
-                this.displayContainer.classList.add('active');
-                
-                // Show the full expression being built
-                let displayText = '';
-                
-                if (this.previousValue !== null && this.operator !== null && !this.shouldResetDisplay) {
-                    // Show: previousValue + operator + currentValue
-                    displayText = `${this.previousValue} ${this.operator} ${this.currentValue}`;
-                } else if (this.operator !== null && this.shouldResetDisplay) {
-                    // Just selected operator, show the operation
-                    displayText = `${this.previousValue} ${this.operator}`;
-                } else {
-                    // Just show current value
-                    displayText = this.currentValue;
-                }
-                
-                this.display.textContent = displayText;
-
-                setTimeout(() => {
-                    this.displayContainer.classList.remove('active');
-                }, 200);
-
-            },
-            clear() {
-                this.expression = '';
-                this.display.textContent = '0';
-            },
-            del() {
-                this.expression = this.expression.slice(0, -1);
-                this.updateDisplay();
-            },
-            updateDisplay() {
-                if (this.expression === '') {
-                    this.display.textContent = '0';
-                } else {
-                    this.display.textContent = this.expression;
-                }
-            }
-        };
-    </script>
 </body>
 </html>
