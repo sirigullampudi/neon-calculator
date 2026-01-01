@@ -1,0 +1,28 @@
+{
+  "name": "neon-calculator",
+  "version": "1.0.0",
+  "description": "A futuristic, cyberpunk-themed calculator with stunning neon visual effects and smooth animations",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000 || python3 -m http.server 8000",
+    "serve": "npx http-server"
+  },
+  "keywords": [
+    "calculator",
+    "neon",
+    "cyberpunk",
+    "animations",
+    "web-app",
+    "interactive"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/neon-calculator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/neon-calculator/issues"
+  },
+  "homepage": "https://github.com/yourusername/neon-calculator#readme"
+}

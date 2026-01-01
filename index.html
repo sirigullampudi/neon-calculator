@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Cyberpunk Calculator</title>
+    <style>
+        /* ======================== RESET & BASE ======================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(0deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent),
+                linear-gradient(90deg, transparent 24%, rgba(0, 255, 255, 0.05) 25%, rgba(0, 255, 255, 0.05) 26%, transparent 27%, transparent 74%, rgba(0, 255, 255, 0.05) 75%, rgba(0, 255, 255, 0.05) 76%, transparent 77%, transparent);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ======================== CONTAINER ======================== */
+        .calculator-wrapper {
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
+            background: rgba(10, 14, 39, 0.8);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.2),
+                0 0 40px rgba(0, 255, 255, 0.1),
+                inset 0 0 20px rgba(0, 255, 255, 0.05);
+            animation: containerPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes containerPulse {
+            0%, 100% {
+                box-shadow: 
+                    0 0 20px rgba(0, 255, 255, 0.2),
+                    0 0 40px rgba(0, 255, 255, 0.1),
+                    inset 0 0 20px rgba(0, 255, 255, 0.05);
+            }
+            50% {
+                box-shadow: 
+                    0 0 30px rgba(0, 255, 255, 0.3),
+                    0 0 60px rgba(0, 255, 255, 0.15),
+                    inset 0 0 25px rgba(0, 255, 255, 0.08);
+            }
+        }
+
+        /* ======================== HEADER ======================== */
+        .calculator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .calculator-title {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        /* Sound toggle */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: rgba(255, 0, 127, 0.3);
+            border: 1px solid #ff007f;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.3);
+        }
+
+        .toggle-switch.active {
+            background: rgba(255, 0, 127, 0.6);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: #ff007f;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 5px rgba(255, 0, 127, 0.8);
+        }
+
+        .toggle-switch.active::after {
+            left: 26px;
+        }
+
+        .toggle-label {
+            font-size: 12px;
+            color: #ff007f;
+            text-shadow: 0 0 5px rgba(255, 0, 127, 0.6);
+            font-weight: bold;
+        }
+
+        /* Mood mode dropdown */
+        .mood-selector {
+            padding: 8px 15px;
+            background: rgba(0, 255, 127, 0.2);
+            border: 1px solid #00ff7f;
+            border-radius: 5px;
+            color: #00ff7f;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            text-shadow: 0 0 5px rgba(0, 255, 127, 0.6);
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 127, 0.2);
+        }
+
+        .mood-selector:hover {
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.5);
+            background: rgba(0, 255, 127, 0.3);
+        }
+
+        .mood-selector:focus {
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 127, 0.6);
+        }
+
+        /* ======================== DISPLAY ======================== */
+        .display-container {
+            background: rgba(0, 20, 40, 0.9);
+            border: 2px solid rgba(0, 255, 200, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 200, 0.2),
+                0 0 20px rgba(0, 255, 200, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .display-container.active {
+            border-color: rgba(0, 255, 200, 0.8);
+            box-shadow: 
+                inset 0 0 15px rgba(0, 255, 200, 0.3),
+                0 0 30px rgba(0, 255, 200, 0.25);
+        }
+
+        .display {
+            font-size: 48px;
+            color: #00ffc8;
+            text-align: right;
+            font-weight: bold;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 200, 0.8),
+                         0 0 20px rgba(0, 255, 200, 0.4);
+            min-height: 60px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            word-wrap: break-word;
+            word-break: break-all;
+            animation: displayGlow 0.3s ease;
+        }
+
+        @keyframes displayGlow {
+            0% {
+                text-shadow: 0 0 10px rgba(0, 255, 200, 0.8),
+                             0 0 20px rgba(0, 255, 200, 0.4);
+            }
+            50% {
+                text-shadow: 0 0 20px rgba(0, 255, 200, 1),
+                             0 0 40px rgba(0, 255, 200, 0.6);
+            }
+            100% {
+                text-shadow: 0 0 10px rgba(0, 255, 200, 0.8),
+                             0 0 20px rgba(0, 255, 200, 0.4);
+            }
+        }
+
+        .status-bar {
+            font-size: 14px;
+            color: rgba(0, 255, 200, 0.6);
+            text-align: right;
+            margin-top: 10px;
+            min-height: 20px;
+            text-shadow: 0 0 5px rgba(0, 255, 200, 0.4);
+        }
+
+        .status-bar.active {
+            animation: statusPulse 0.6s ease-in-out;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% {
+                color: rgba(0, 255, 200, 0.6);
+                text-shadow: 0 0 5px rgba(0, 255, 200, 0.4);
+            }
+            50% {
+                color: rgba(0, 255, 200, 1);
+                text-shadow: 0 0 10px rgba(0, 255, 200, 0.8);
+            }
+        }
+
+        /* ======================== BUTTON GRID ======================== */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        /* Button base styles */
+        .btn {
+            padding: 15px;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 0 5px currentColor;
+            letter-spacing: 1px;
+        }
+
+        /* Ripple effect */
+        .btn::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Number buttons - Neon Blue */
+        .btn.number {
+            background: rgba(0, 150, 255, 0.3);
+            color: #00a0ff;
+            border: 2px solid #0090ff;
+            box-shadow: 
+                0 0 10px rgba(0, 150, 255, 0.5),
+                inset 0 0 10px rgba(0, 150, 255, 0.2);
+        }
+
+        .btn.number:hover {
+            background: rgba(0, 150, 255, 0.5);
+            box-shadow: 
+                0 0 20px rgba(0, 150, 255, 0.8),
+                inset 0 0 15px rgba(0, 150, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn.number:active {
+            transform: scale(0.98);
+        }
+
+        /* Operator buttons - Neon Pink/Purple */
+        .btn.operator {
+            background: rgba(255, 0, 127, 0.3);
+            color: #ff007f;
+            border: 2px solid #ff0080;
+            box-shadow: 
+                0 0 10px rgba(255, 0, 127, 0.5),
+                inset 0 0 10px rgba(255, 0, 127, 0.2);
+        }
+
+        .btn.operator:hover {
+            background: rgba(255, 0, 127, 0.5);
+            box-shadow: 
+                0 0 20px rgba(255, 0, 127, 0.8),
+                inset 0 0 15px rgba(255, 0, 127, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn.operator:active {
+            transform: scale(0.98);
+        }
+
+        /* Equals button - Neon Green */
+        .btn.equals {
+            grid-column: span 2;
+            background: rgba(0, 255, 127, 0.3);
+            color: #00ff7f;
+            border: 2px solid #00ff80;
+            box-shadow: 
+                0 0 15px rgba(0, 255, 127, 0.5),
+                inset 0 0 10px rgba(0, 255, 127, 0.2);
+        }
+
+        .btn.equals:hover {
+            background: rgba(0, 255, 127, 0.5);
+            box-shadow: 
+                0 0 25px rgba(0, 255, 127, 0.8),
+                inset 0 0 15px rgba(0, 255, 127, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn.equals:active {
+            transform: scale(0.98);
+            animation: equalsFlash 0.4s ease;
+        }
+
+        @keyframes equalsFlash {
+            0%, 100% {
+                box-shadow: 
+                    0 0 25px rgba(0, 255, 127, 0.8),
+                    inset 0 0 15px rgba(0, 255, 127, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 0 40px rgba(0, 255, 127, 1),
+                    inset 0 0 20px rgba(0, 255, 127, 0.5);
+            }
+        }
+
+        /* Clear button - Neon Red */
+        .btn.clear {
+            grid-column: span 2;
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff0040;
+            border: 2px solid #ff0040;
+            box-shadow: 
+                0 0 15px rgba(255, 0, 0, 0.5),
+                inset 0 0 10px rgba(255, 0, 0, 0.2);
+        }
+
+        .btn.clear:hover {
+            background: rgba(255, 0, 0, 0.5);
+            box-shadow: 
+                0 0 25px rgba(255, 0, 0, 0.8),
+                inset 0 0 15px rgba(255, 0, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        .btn.clear:active {
+            transform: scale(0.98);
+        }
+
+        /* Special button for decimal - Cyan */
+        .btn.decimal {
+            background: rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            box-shadow: 
+                0 0 10px rgba(0, 255, 255, 0.5),
+                inset 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .btn.decimal:hover {
+            background: rgba(0, 255, 255, 0.5);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.8),
+                inset 0 0 15px rgba(0, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* ======================== RESPONSIVE ======================== */
+        @media (max-width: 600px) {
+            .calculator-wrapper {
+                padding: 20px;
+                width: 95vw;
+                max-width: 400px;
+            }
+
+            .display {
+                font-size: 36px;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 18px;
+            }
+
+            .button-grid {
+                gap: 10px;
+            }
+        }
+
+        /* ======================== COLOR THEME VARIATIONS ======================== */
+        /* Default theme (Cyan) - already defined above */
+
+        /* Synthwave theme - Pink dominant */
+        body.mood-synthwave {
+            background: linear-gradient(135deg, #16213e 0%, #0f3460 50%, #1a1a2e 100%);
+        }
+
+        body.mood-synthwave .display {
+            color: #ff006e;
+            text-shadow: 0 0 10px rgba(255, 0, 110, 0.8),
+                         0 0 20px rgba(255, 0, 110, 0.4);
+        }
+
+        body.mood-synthwave .display-container {
+            border-color: rgba(255, 0, 110, 0.4);
+            box-shadow: 
+                inset 0 0 10px rgba(255, 0, 110, 0.2),
+                0 0 20px rgba(255, 0, 110, 0.15);
+        }
+
+        body.mood-synthwave .btn.number {
+            background: rgba(255, 100, 200, 0.3);
+            color: #ff64c8;
+            border-color: #ff64c8;
+            box-shadow: 
+                0 0 10px rgba(255, 100, 200, 0.5),
+                inset 0 0 10px rgba(255, 100, 200, 0.2);
+        }
+
+        body.mood-synthwave .btn.number:hover {
+            box-shadow: 
+                0 0 20px rgba(255, 100, 200, 0.8),
+                inset 0 0 15px rgba(255, 100, 200, 0.3);
+        }
+
+        /* Matrix theme - Green dominant */
+        body.mood-matrix {
+            background: linear-gradient(135deg, #000 0%, #003300 50%, #001a00 100%);
+        }
+
+        body.mood-matrix .display {
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8),
+                         0 0 20px rgba(0, 255, 0, 0.4);
+        }
+
+        body.mood-matrix .display-container {
+            border-color: rgba(0, 255, 0, 0.4);
+            box-shadow: 
+                inset 0 0 10px rgba(0, 255, 0, 0.2),
+                0 0 20px rgba(0, 255, 0, 0.15);
+        }
+
+        body.mood-matrix .btn.number {
+            background: rgba(0, 200, 100, 0.3);
+            color: #00ff80;
+            border-color: #00ff80;
+            box-shadow: 
+                0 0 10px rgba(0, 200, 100, 0.5),
+                inset 0 0 10px rgba(0, 200, 100, 0.2);
+        }
+
+        body.mood-matrix .btn.number:hover {
+            box-shadow: 
+                0 0 20px rgba(0, 200, 100, 0.8),
+                inset 0 0 15px rgba(0, 200, 100, 0.3);
+        }
+
+        /* Vaporwave theme - Purple/Blue dominant */
+        body.mood-vaporwave {
+            background: linear-gradient(135deg, #1a0033 0%, #330066 50%, #0d1a33 100%);
+        }
+
+        body.mood-vaporwave .display {
+            color: #b700ff;
+            text-shadow: 0 0 10px rgba(183, 0, 255, 0.8),
+                         0 0 20px rgba(183, 0, 255, 0.4);
+        }
+
+        body.mood-vaporwave .display-container {
+            border-color: rgba(183, 0, 255, 0.4);
+            box-shadow: 
+                inset 0 0 10px rgba(183, 0, 255, 0.2),
+                0 0 20px rgba(183, 0, 255, 0.15);
+        }
+
+        body.mood-vaporwave .btn.number {
+            background: rgba(180, 100, 255, 0.3);
+            color: #d464ff;
+            border-color: #d464ff;
+            box-shadow: 
+                0 0 10px rgba(180, 100, 255, 0.5),
+                inset 0 0 10px rgba(180, 100, 255, 0.2);
+        }
+
+        body.mood-vaporwave .btn.number:hover {
+            box-shadow: 
+                0 0 20px rgba(180, 100, 255, 0.8),
+                inset 0 0 15px rgba(180, 100, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator-wrapper">
+        <!-- Header with controls -->
+        <div class="calculator-header">
+            <div class="calculator-title">⚡ NEON CALC ⚡</div>
+            <div class="controls">
+                <div>
+                    <div class="toggle-label">🔊 SOUND</div>
+                    <div class="toggle-switch" id="soundToggle"></div>
+                </div>
+                <select class="mood-selector" id="moodSelector">
+                    <option value="default">Cyan Vibes</option>
+                    <option value="synthwave">Synthwave</option>
+                    <option value="matrix">Matrix</option>
+                    <option value="vaporwave">Vaporwave</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Display -->
+        <div class="display-container" id="displayContainer">
+            <div class="display" id="display">0</div>
+            <div class="status-bar" id="statusBar">⚡ Ready</div>
+        </div>
+
+        <!-- Button Grid -->
+        <div class="button-grid">
+            <!-- First row -->
+            <button class="btn clear" data-action="clear">AC</button>
+            <button class="btn operator" data-operator="/">÷</button>
+            <button class="btn operator" data-operator="*">×</button>
+            <button class="btn operator" data-operator="-">−</button>
+
+            <!-- Number rows -->
+            <button class="btn number" data-number="7">7</button>
+            <button class="btn number" data-number="8">8</button>
+            <button class="btn number" data-number="9">9</button>
+            <button class="btn operator" data-operator="+">+</button>
+
+            <button class="btn number" data-number="4">4</button>
+            <button class="btn number" data-number="5">5</button>
+            <button class="btn number" data-number="6">6</button>
+            <button class="btn decimal" data-action="decimal">.</button>
+
+            <button class="btn number" data-number="1">1</button>
+            <button class="btn number" data-number="2">2</button>
+            <button class="btn number" data-number="3">3</button>
+            <button class="btn operator" data-operator="del">⌫</button>
+
+            <!-- Bottom row -->
+            <button class="btn number" data-number="0">0</button>
+            <button class="btn equals" data-action="equals">=</button>
+        </div>
+    </div>
+
+    <script>
+        // ======================== CALCULATOR LOGIC ========================
+        class NeonCalculator {
+            constructor() {
+                // State
+                this.display = document.getElementById('display');
+                this.statusBar = document.getElementById('statusBar');
+                this.displayContainer = document.getElementById('displayContainer');
+                this.currentValue = '0';
+                this.previousValue = null;
+                this.operator = null;
+                this.shouldResetDisplay = false;
+                this.soundEnabled = false;
+                this.lastActivityTime = Date.now();
+                this.idleThreshold = 3000; // ms
+
+                // Initialize
+                this.initEventListeners();
+                this.initSound();
+                this.initMoodMode();
+                this.initIdleStatus();
+                this.updateDisplay();
+            }
+
+            // ======================== EVENT LISTENERS ========================
+            initEventListeners() {
+                // Number buttons
+                document.querySelectorAll('[data-number]').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleNumber(e.target.dataset.number));
+                });
+
+                // Operator buttons
+                document.querySelectorAll('[data-operator]').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleOperator(e.target.dataset.operator));
+                });
+
+                // Action buttons
+                document.querySelectorAll('[data-action]').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.handleAction(e.target.dataset.action));
+                });
+            }
+
+            // ======================== SOUND SYSTEM ========================
+            initSound() {
+                const soundToggle = document.getElementById('soundToggle');
+                soundToggle.addEventListener('click', () => {
+                    this.soundEnabled = !this.soundEnabled;
+                    soundToggle.classList.toggle('active');
+                });
+            }
+
+            playClickSound() {
+                if (!this.soundEnabled) return;
+
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                oscillator.connect(gain);
+                gain.connect(audioContext.destination);
+
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+
+                gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.1);
+            }
+
+            // ======================== MOOD MODE ========================
+            initMoodMode() {
+                const moodSelector = document.getElementById('moodSelector');
+                moodSelector.addEventListener('change', (e) => {
+                    document.body.className = '';
+                    if (e.target.value !== 'default') {
+                        document.body.classList.add(`mood-${e.target.value}`);
+                    }
+                    this.playClickSound();
+                });
+            }
+
+            // ======================== IDLE STATUS ========================
+            initIdleStatus() {
+                setInterval(() => {
+                    const idleTime = Date.now() - this.lastActivityTime;
+                    if (idleTime > this.idleThreshold && this.operator === null && this.shouldResetDisplay === false) {
+                        this.statusBar.textContent = '⚡ Ready';
+                        this.statusBar.classList.remove('active');
+                    }
+                }, 500);
+            }
+
+            updateIdleStatus() {
+                this.lastActivityTime = Date.now();
+                this.statusBar.classList.add('active');
+                this.statusBar.textContent = '⚡ Processing...';
+            }
+
+            // ======================== NUMBER HANDLING ========================
+            handleNumber(num) {
+                this.updateIdleStatus();
+                this.playClickSound();
+
+                if (this.shouldResetDisplay) {
+                    this.currentValue = num;
+                    this.shouldResetDisplay = false;
+                } else {
+                    this.currentValue = this.currentValue === '0' ? num : this.currentValue + num;
+                }
+
+                // Limit display length
+                if (this.currentValue.length > 12) {
+                    this.currentValue = this.currentValue.slice(0, 12);
+                }
+
+                this.updateDisplay();
+            }
+
+            // ======================== OPERATOR HANDLING ========================
+            handleOperator(op) {
+                this.updateIdleStatus();
+                this.playClickSound();
+
+                if (op === 'del') {
+                    // Delete last character
+                    if (this.currentValue.length > 1) {
+                        this.currentValue = this.currentValue.slice(0, -1);
+                    } else {
+                        this.currentValue = '0';
+                    }
+                    this.shouldResetDisplay = false;
+                    this.updateDisplay();
+                    return;
+                }
+
+                // Handle pending operation
+                if (this.operator !== null && !this.shouldResetDisplay) {
+                    this.calculate();
+                }
+
+                this.previousValue = this.currentValue;
+                this.operator = op;
+                this.shouldResetDisplay = true;
+                this.updateDisplay();
+            }
+
+            // ======================== ACTION HANDLING ========================
+            handleAction(action) {
+                this.updateIdleStatus();
+                this.playClickSound();
+
+                if (action === 'clear') {
+                    this.reset();
+                } else if (action === 'decimal') {
+                    this.addDecimal();
+                } else if (action === 'equals') {
+                    this.calculate();
+                }
+                this.updateDisplay();
+            }
+
+            // ======================== DECIMAL HANDLING ========================
+            addDecimal() {
+                if (this.shouldResetDisplay) {
+                    this.currentValue = '0.';
+                    this.shouldResetDisplay = false;
+                } else if (!this.currentValue.includes('.')) {
+                    this.currentValue += '.';
+                }
+            }
+
+            // ======================== CALCULATION ========================
+            calculate() {
+                if (this.operator === null || this.previousValue === null) return;
+
+                const prev = parseFloat(this.previousValue);
+                const current = parseFloat(this.currentValue);
+                let result = 0;
+
+                switch (this.operator) {
+                    case '+':
+                        result = prev + current;
+                        break;
+                    case '-':
+                        result = prev - current;
+                        break;
+                    case '*':
+                        result = prev * current;
+                        break;
+                    case '/':
+                        result = current !== 0 ? prev / current : 0;
+                        break;
+                }
+
+                // Format result
+                this.currentValue = result.toString();
+                if (this.currentValue.includes('.')) {
+                    this.currentValue = parseFloat(this.currentValue).toFixed(8).replace(/\.?0+$/, '');
+                }
+
+                // Limit display length
+                if (this.currentValue.length > 12) {
+                    this.currentValue = parseFloat(this.currentValue).toExponential(5);
+                }
+
+                this.operator = null;
+                this.previousValue = null;
+                this.shouldResetDisplay = true;
+                this.statusBar.textContent = '✓ Calculated';
+            }
+
+            // ======================== RESET ========================
+            reset() {
+                this.currentValue = '0';
+                this.previousValue = null;
+                this.operator = null;
+                this.shouldResetDisplay = false;
+                this.statusBar.textContent = '⚡ Cleared';
+            }
+
+            // ======================== DISPLAY UPDATE ========================
+            updateDisplay() {
+                this.displayContainer.classList.add('active');
+                this.display.textContent = this.currentValue;
+
+                setTimeout(() => {
+                    this.displayContainer.classList.remove('active');
+                }, 200);
+            }
+        }
+
+        // Initialize calculator on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            new NeonCalculator();
+        });
+    </script>
+</body>
+</html>
